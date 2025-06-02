@@ -100,7 +100,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6" />
             <span className="text-xl font-bold tracking-tight hidden md:inline-block">
-              StockIt
+              FinanceFreak
             </span>
           </Link>
           <NavigationMenu className="hidden md:flex">
