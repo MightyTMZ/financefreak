@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'StockIt - Virtual Stock Market Game',
+  title: 'FinanceFreak - Virtual Stock Market Game',
   description: 'Trade virtual stocks with real market data in this stock market simulation game',
 };
 
