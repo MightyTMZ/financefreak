@@ -76,7 +76,7 @@ export function Navbar() {
                   onClick={() => setIsOpen(false)}
                 >
                   <TrendingUp className="h-6 w-6" />
-                  <span>StockIt</span>
+                  <span>FinanceFreak</span>
                 </Link>
                 <div className="grid gap-3">
                   {routes.map((route) => (
