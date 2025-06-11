@@ -350,7 +350,7 @@ export default function AnalyticsPage() {
                     <span className="font-medium">{performanceMetrics.sharpeRatio}</span>
                   </div>
                   <Progress value={Math.min(performanceMetrics.sharpeRatio * 33.33, 100)} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">Excellent (>1.5)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Excellent (&gt;1.5)</p>
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
@@ -358,7 +358,7 @@ export default function AnalyticsPage() {
                     <span className="font-medium">{performanceMetrics.sortinoRatio}</span>
                   </div>
                   <Progress value={Math.min(performanceMetrics.sortinoRatio * 25, 100)} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">Excellent (>2.0)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Excellent (&gt;2.0)</p>
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
@@ -366,7 +366,7 @@ export default function AnalyticsPage() {
                     <span className="font-medium">{performanceMetrics.calmarRatio}</span>
                   </div>
                   <Progress value={Math.min(performanceMetrics.calmarRatio * 25, 100)} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">Good (>1.5)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Good (&gt;1.5)</p>
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
@@ -374,7 +374,7 @@ export default function AnalyticsPage() {
                     <span className="font-medium">{performanceMetrics.informationRatio}</span>
                   </div>
                   <Progress value={Math.min(performanceMetrics.informationRatio * 50, 100)} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">Good (>0.5)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Good (&gt;0.5)</p>
                 </div>
               </CardContent>
             </Card>

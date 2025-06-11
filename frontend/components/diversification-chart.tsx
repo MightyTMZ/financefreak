@@ -10,7 +10,7 @@ interface DiversificationData {
 }
 
 interface DiversificationChartProps {
-  data: DiversificationData[]
+  data?: DiversificationData[] // Allowing it to be optional/nullable
 }
 
 const formatCurrency = (value: number) => {
@@ -22,45 +22,53 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
-export default function DiversificationChart({ data }: DiversificationChartProps) {
+export default function DiversificationChart({ data = [] }: DiversificationChartProps) {
+  const isDataEmpty = !data || data.length === 0
+
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={120}
-          paddingAngle={2}
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Pie>
-        <Tooltip 
-          formatter={(value, name, props) => [
-            formatCurrency(Number(value)), 
-            `${props.payload.percentage}%`
-          ]}
-          labelFormatter={(label) => `${label} Sector`}
-          contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            borderColor: "hsl(var(--border))",
-            borderRadius: "var(--radius)",
-          }}
-        />
-        <Legend 
-          verticalAlign="bottom" 
-          height={36}
-          formatter={(value, entry) => (
-            <span style={{ color: entry.color }}>
-              {value} ({entry.payload.percentage}%)
-            </span>
-          )}
-        />
-      </PieChart>
+      {isDataEmpty ? (
+        <div style={{ textAlign: "center", paddingTop: "2rem" }}>
+          No data available
+        </div>
+      ) : (
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={120}
+            paddingAngle={2}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color || "#ccc"} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value, name, props) => [
+              formatCurrency(Number(value ?? 0)), 
+              `${props?.payload?.percentage ?? 0}%`
+            ]}
+            labelFormatter={(label) => `${label} Sector`}
+            contentStyle={{
+              backgroundColor: "hsl(var(--card))",
+              borderColor: "hsl(var(--border))",
+              borderRadius: "var(--radius)",
+            }}
+          />
+          {/* <Legend 
+            verticalAlign="bottom" 
+            height={36}
+            formatter={(value, entry) => (
+              <span style={{ color: entry?.color ?? "#000" }}>
+                {value} ({entry?.payload?.percentage ?? 0}%)
+              </span>
+            )}
+          /> */}
+        </PieChart>
+      )}
     </ResponsiveContainer>
   )
 }
