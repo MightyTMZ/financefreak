@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { User, ChevronRight, Settings, ClipboardList, HelpCircle, ArrowUpRight, LogOut } from "lucide-react"
+import { User, ChevronRight, Settings, ClipboardList, HelpCircle, ArrowUpRight, LogOut, Shield, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,10 +10,20 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
+import { TwoFactorSetup } from "@/components/auth/two-factor-setup"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ProfilePage() {
   const [username, setUsername] = useState("yourusername")
   const [email, setEmail] = useState("your.email@example.com")
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false)
+  const [showDisable2FA, setShowDisable2FA] = useState(false)
+  const [disableCode, setDisableCode] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+  
   const [notifications, setNotifications] = useState({
     portfolio: true,
     price: true,
@@ -21,6 +31,47 @@ export default function ProfilePage() {
     transactions: true,
     promotions: false
   })
+
+  const handleDisable2FA = async () => {
+    if (disableCode.length !== 6) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/auth/2fa/disable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: disableCode }),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setTwoFactorEnabled(false)
+        setShowDisable2FA(false)
+        setDisableCode("")
+        toast({
+          title: "2FA disabled",
+          description: "Two-factor authentication has been disabled.",
+        })
+      } else {
+        toast({
+          title: "Disable failed",
+          description: result.error || "Invalid verification code",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Disable failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
   return (
     <div className="container max-w-6xl py-8 space-y-6">
@@ -217,9 +268,9 @@ export default function ProfilePage() {
             <TabsContent value="security" className="pt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
+                  <CardTitle>Password Settings</CardTitle>
                   <CardDescription>
-                    Manage your account security preferences
+                    Change your account password
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -239,6 +290,104 @@ export default function ProfilePage() {
                 <CardFooter>
                   <Button className="w-full">Update Password</Button>
                 </CardFooter>
+              </Card>
+
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {twoFactorEnabled ? (
+                      <ShieldCheck className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <Shield className="h-5 w-5" />
+                    )}
+                    Two-Factor Authentication
+                  </CardTitle>
+                  <CardDescription>
+                    {twoFactorEnabled 
+                      ? "Two-factor authentication is enabled for your account."
+                      : "Add an extra layer of security to your account."
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {showTwoFactorSetup ? (
+                    <TwoFactorSetup
+                      onComplete={() => {
+                        setTwoFactorEnabled(true)
+                        setShowTwoFactorSetup(false)
+                      }}
+                      onCancel={() => setShowTwoFactorSetup(false)}
+                    />
+                  ) : showDisable2FA ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Enter your authentication code to disable 2FA</Label>
+                        <div className="flex justify-center">
+                          <InputOTP
+                            maxLength={6}
+                            value={disableCode}
+                            onChange={setDisableCode}
+                            onComplete={handleDisable2FA}
+                          >
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleDisable2FA} 
+                          disabled={isLoading || disableCode.length !== 6}
+                          variant="destructive"
+                          className="flex-1"
+                        >
+                          {isLoading ? "Disabling..." : "Disable 2FA"}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            setShowDisable2FA(false)
+                            setDisableCode("")
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">
+                          {twoFactorEnabled ? "2FA Enabled" : "2FA Disabled"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {twoFactorEnabled 
+                            ? "Your account is protected with two-factor authentication."
+                            : "Enable 2FA to secure your account with an additional verification step."
+                          }
+                        </p>
+                      </div>
+                      {twoFactorEnabled ? (
+                        <Button 
+                          variant="destructive" 
+                          onClick={() => setShowDisable2FA(true)}
+                        >
+                          Disable 2FA
+                        </Button>
+                      ) : (
+                        <Button onClick={() => setShowTwoFactorSetup(true)}>
+                          Enable 2FA
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             </TabsContent>
             

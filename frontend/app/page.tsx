@@ -13,7 +13,7 @@ export default function Home() {
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                  Virtual Trading Simulator and Game
+                  Master the Market with Virtual Trading
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
                   Trade real stocks with virtual money. Learn investing strategies without the risk. Build your portfolio and compete with friends.

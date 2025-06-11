@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { BarChart3, Home, Search, TrendingUp, Trophy, User } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { BarChart3, Home, Search, TrendingUp, Trophy, User, LogOut, DollarSign, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -14,11 +14,25 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useToast } from "@/hooks/use-toast"
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
+
+  // Mock user state - in real app, this would come from auth context
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null)
 
   const routes = [
     {
@@ -37,9 +51,19 @@ export function Navbar() {
       icon: <Search className="h-5 w-5 mr-2" />,
     },
     {
+      name: "Stocks",
+      path: "/stocks",
+      icon: <DollarSign className="h-5 w-5 mr-2" />,
+    },
+    {
       name: "Market",
       path: "/market",
       icon: <TrendingUp className="h-5 w-5 mr-2" />,
+    },
+    {
+      name: "Analytics",
+      path: "/analytics",
+      icon: <Activity className="h-5 w-5 mr-2" />,
     },
     {
       name: "Leaderboard",
@@ -52,6 +76,29 @@ export function Navbar() {
       icon: <User className="h-5 w-5 mr-2" />,
     },
   ]
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      })
+
+      if (response.ok) {
+        setUser(null)
+        toast({
+          title: "Logged out",
+          description: "You have been successfully logged out.",
+        })
+        router.push('/')
+      }
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "An error occurred while logging out.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -76,7 +123,7 @@ export function Navbar() {
                   onClick={() => setIsOpen(false)}
                 >
                   <TrendingUp className="h-6 w-6" />
-                  <span>StockIt</span>
+                  <span>FinanceFreak</span>
                 </Link>
                 <div className="grid gap-3">
                   {routes.map((route) => (
@@ -100,7 +147,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6" />
             <span className="text-xl font-bold tracking-tight hidden md:inline-block">
-              StockIt
+              FinanceFreak
             </span>
           </Link>
           <NavigationMenu className="hidden md:flex">
@@ -125,7 +172,56 @@ export function Navbar() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button className="hidden md:flex">Sign In</Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{user.username}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/auth/login">Sign In</Link>
+              </Button>
+              <Button size="sm" asChild className="hidden md:flex">
+                <Link href="/auth/register">Sign Up</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>
